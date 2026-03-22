@@ -8,6 +8,7 @@ const scanRouter   = require('./routes/scanRoutes')
 const adminRouter  = require('./routes/adminRoute')
 
 dotenv.config()
+console.log("MONGO_URI:", process.env.MONGO_URI)
 connectDB()
 
 const app = express()
