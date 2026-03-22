@@ -1,0 +1,26 @@
+.about-page {
+	display:flex;
+	align-items:center;
+	justify-content:center;
+	padding:72px 16px;
+	background: linear-gradient(180deg, #f8fbff 0%, transparent 40%);
+}
+.page-card {
+	max-width:860px;
+	width:100%;
+	background: linear-gradient(180deg,#ffffff 0%, #fbfdff 100%);
+	border-radius:14px;
+	box-shadow: 0 20px 50px rgba(8,18,40,0.08);
+	border: 1px solid rgba(18,30,60,0.04);
+}
+.page-body {
+	padding:32px;
+	color:#0b1530;
+}
+.page-body h2 {
+	margin:0 0 8px 0;
+	font-size:1.6rem;
+}
+.page-body h3 { margin-top:18px; }
+.page-body p { color:#435067; line-height:1.6; }
+.page-body a { color:#2b6cff; }
