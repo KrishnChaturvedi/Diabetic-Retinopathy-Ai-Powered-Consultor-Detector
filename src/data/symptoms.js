@@ -1,0 +1,88 @@
+const SYMPTOMS = [
+  {
+    id: 'blur',
+    label: 'Blurry Vision',
+    emoji: '👁',
+    info: 'High blood sugar causes the lens to swell, changing your focus. Can also indicate macular edema — fluid buildup in the center of the retina.',
+    questions: [
+      { q: 'How long have you had blurry vision?', opts: [{ t: 'Just a few days', s: 3 }, { t: 'A few weeks', s: 2 }, { t: 'Several months', s: 2 }, { t: 'More than a year', s: 1 }] },
+      { q: 'Is the blurry vision in one eye or both eyes?', opts: [{ t: 'One eye only', s: 3 }, { t: 'Both eyes equally', s: 2 }, { t: 'Both but one is worse', s: 2 }, { t: 'Not sure', s: 1 }] },
+      { q: 'Does vision get worse after meals or high blood sugar?', opts: [{ t: 'Yes, clearly after meals', s: 3 }, { t: 'Sometimes', s: 2 }, { t: 'No difference noticed', s: 1 }, { t: "I don't check blood sugar", s: 2 }] },
+      { q: 'Do you see halos or glare around lights?', opts: [{ t: 'Yes, very noticeable', s: 3 }, { t: 'Occasionally', s: 2 }, { t: 'Only at night', s: 2 }, { t: 'No, never', s: 0 }] },
+      { q: 'Is it blurry all the time or does it come and go?', opts: [{ t: 'All the time, constant', s: 3 }, { t: 'Comes and goes randomly', s: 2 }, { t: 'Only in certain lighting', s: 1 }, { t: 'It fluctuates daily', s: 2 }] },
+      { q: 'How long have you had diabetes?', opts: [{ t: 'Less than 1 year', s: 1 }, { t: '1–5 years', s: 2 }, { t: '5–10 years', s: 3 }, { t: 'More than 10 years', s: 3 }] },
+    ],
+  },
+  {
+    id: 'spots',
+    label: 'Floating Spots',
+    emoji: '🔵',
+    info: 'Floaters are caused by bleeding into the vitreous gel from abnormal blood vessels in DR. Sudden new floaters with flashes require urgent examination.',
+    questions: [
+      { q: 'When did you first notice the floating spots?', opts: [{ t: 'Just today or yesterday', s: 3 }, { t: 'Within the last week', s: 3 }, { t: 'A few months ago', s: 2 }, { t: 'Been there for years', s: 1 }] },
+      { q: 'Did the spots appear suddenly or gradually?', opts: [{ t: 'Very suddenly, all at once', s: 3 }, { t: 'Appeared over a few days', s: 2 }, { t: 'Gradually over weeks', s: 2 }, { t: 'Slowly over months', s: 1 }] },
+      { q: 'What do the spots look like?', opts: [{ t: 'Dark/black solid spots', s: 3 }, { t: 'Cobweb or thread-like', s: 1 }, { t: 'Transparent/translucent', s: 1 }, { t: 'Mix of dark and light', s: 2 }] },
+      { q: 'Do you also see flashes of light?', opts: [{ t: 'Yes, frequent flashes', s: 3 }, { t: 'Occasional flashes', s: 2 }, { t: 'Rarely or just once', s: 2 }, { t: 'No flashes at all', s: 0 }] },
+      { q: 'Have the spots increased in number recently?', opts: [{ t: 'Yes, many more than before', s: 3 }, { t: 'A few more, slightly', s: 2 }, { t: 'Stayed about the same', s: 1 }, { t: 'Actually fewer now', s: 0 }] },
+      { q: 'How long have you had diabetes?', opts: [{ t: 'Less than 1 year', s: 1 }, { t: '1–5 years', s: 2 }, { t: '5–10 years', s: 3 }, { t: 'More than 10 years', s: 3 }] },
+    ],
+  },
+  {
+    id: 'dark',
+    label: 'Dark / Blank Areas',
+    emoji: '⬛',
+    info: 'Dark or blank areas in vision mean part of the retina is damaged or not receiving blood supply. This needs immediate medical evaluation.',
+    questions: [
+      { q: 'Where is the dark area in your vision?', opts: [{ t: 'Right in the center', s: 3 }, { t: 'On the sides/periphery', s: 2 }, { t: 'Both center and sides', s: 3 }, { t: 'Varies — hard to say', s: 2 }] },
+      { q: 'What does the dark area look like?', opts: [{ t: 'Like a curtain or shadow', s: 3 }, { t: 'A blank/missing patch', s: 3 }, { t: 'A dark smudge', s: 2 }, { t: 'Just a slight dimness', s: 1 }] },
+      { q: 'Is it in one eye or both eyes?', opts: [{ t: 'One eye only', s: 2 }, { t: 'Both eyes', s: 3 }, { t: 'Both but one is worse', s: 3 }, { t: 'Not sure', s: 1 }] },
+      { q: 'Has the dark area grown bigger over time?', opts: [{ t: 'Yes, noticeably bigger', s: 3 }, { t: 'Slightly larger maybe', s: 2 }, { t: 'Same size as before', s: 1 }, { t: 'Just noticed it today', s: 3 }] },
+      { q: 'Did it appear suddenly or slowly?', opts: [{ t: 'Appeared very suddenly', s: 3 }, { t: 'Developed over days', s: 2 }, { t: 'Slowly over weeks/months', s: 2 }, { t: 'Always been there slightly', s: 1 }] },
+      { q: 'How long have you had diabetes?', opts: [{ t: 'Less than 1 year', s: 1 }, { t: '1–5 years', s: 2 }, { t: '5–10 years', s: 3 }, { t: 'More than 10 years', s: 3 }] },
+    ],
+  },
+  {
+    id: 'night',
+    label: 'Night Vision Issues',
+    emoji: '🌙',
+    info: 'Difficulty seeing in low light is an early sign of retinal damage. Photoreceptor cells in the retina are sensitive to blood sugar and deteriorate over time.',
+    questions: [
+      { q: 'When did you first notice difficulty seeing at night?', opts: [{ t: 'Just recently, past few weeks', s: 3 }, { t: 'A few months ago', s: 2 }, { t: 'About a year ago', s: 2 }, { t: 'For several years now', s: 1 }] },
+      { q: 'Do car headlights cause painful glare?', opts: [{ t: 'Yes, extremely blinding', s: 3 }, { t: 'Quite uncomfortable', s: 2 }, { t: 'A little more than before', s: 1 }, { t: 'No, normal as always', s: 0 }] },
+      { q: 'Can you read in a dimly lit room?', opts: [{ t: 'No, completely impossible', s: 3 }, { t: 'Very difficult, need bright light', s: 2 }, { t: 'Manageable but harder than before', s: 1 }, { t: 'Yes, no problem', s: 0 }] },
+      { q: 'How hard is it to adjust from bright to dark room?', opts: [{ t: 'Takes very long, over 5 minutes', s: 3 }, { t: 'Takes longer than it used to', s: 2 }, { t: 'Slight delay, mostly fine', s: 1 }, { t: 'Normal, adjusts quickly', s: 0 }] },
+      { q: 'Has your night vision gotten worse recently?', opts: [{ t: 'Much worse in past month', s: 3 }, { t: 'Gradually worse over months', s: 2 }, { t: 'About the same as before', s: 1 }, { t: 'Actually slightly better', s: 0 }] },
+      { q: 'How long have you had diabetes?', opts: [{ t: 'Less than 1 year', s: 1 }, { t: '1–5 years', s: 2 }, { t: '5–10 years', s: 3 }, { t: 'More than 10 years', s: 3 }] },
+    ],
+  },
+  {
+    id: 'color',
+    label: 'Color Changes',
+    emoji: '🎨',
+    info: 'Color vision changes indicate macular edema or cone cell damage. The macula handles color and detail vision and is frequently affected in diabetic eye disease.',
+    questions: [
+      { q: 'Do colors appear faded or washed out?', opts: [{ t: 'Yes, very noticeably faded', s: 3 }, { t: 'Slightly duller than before', s: 2 }, { t: 'Only certain colors look off', s: 1 }, { t: 'No, colors look normal', s: 0 }] },
+      { q: 'Do whites look yellowish or brownish?', opts: [{ t: 'Yes, clearly yellowish', s: 3 }, { t: 'Slightly off-white', s: 2 }, { t: 'Only sometimes', s: 1 }, { t: 'No, whites look white', s: 0 }] },
+      { q: 'Can you tell similar colors apart like blue and purple?', opts: [{ t: 'No, very hard to distinguish', s: 3 }, { t: 'Sometimes confuse similar shades', s: 2 }, { t: 'Rarely have trouble', s: 1 }, { t: 'Yes, no problem at all', s: 0 }] },
+      { q: 'Is the color change in one eye or both?', opts: [{ t: 'One eye is clearly different', s: 2 }, { t: 'Both eyes affected equally', s: 3 }, { t: 'Both but one is worse', s: 3 }, { t: 'Hard to tell', s: 1 }] },
+      { q: 'Did the color change happen suddenly or gradually?', opts: [{ t: 'Happened very suddenly', s: 3 }, { t: 'Noticed over a few days', s: 2 }, { t: 'Gradually over months', s: 2 }, { t: 'Very slowly, barely noticed', s: 1 }] },
+      { q: 'How long have you had diabetes?', opts: [{ t: 'Less than 1 year', s: 1 }, { t: '1–5 years', s: 2 }, { t: '5–10 years', s: 3 }, { t: 'More than 10 years', s: 3 }] },
+    ],
+  },
+  {
+    id: 'pain',
+    label: 'Eye Pain / Pressure',
+    emoji: '😣',
+    info: "Eye pain in diabetics can indicate neovascular glaucoma — where abnormal blood vessels block the eye's drainage angle, dangerously raising eye pressure.",
+    questions: [
+      { q: 'How would you describe the eye pain?', opts: [{ t: 'Sharp stabbing pain', s: 3 }, { t: 'Dull constant ache', s: 2 }, { t: 'Pressure or heaviness', s: 3 }, { t: 'Just mild discomfort', s: 1 }] },
+      { q: 'Is the pain constant or does it come and go?', opts: [{ t: 'Constant, never goes away', s: 3 }, { t: 'Mostly there, sometimes less', s: 2 }, { t: 'Comes and goes throughout day', s: 2 }, { t: 'Only occasionally', s: 1 }] },
+      { q: 'Is the eye red or watery along with the pain?', opts: [{ t: 'Yes, very red and watery', s: 3 }, { t: 'Slightly red', s: 2 }, { t: 'Watery but not red', s: 1 }, { t: 'No redness or watering', s: 1 }] },
+      { q: 'Do you have headache or nausea with the eye pain?', opts: [{ t: 'Yes, both headache and nausea', s: 3 }, { t: 'Headache only', s: 2 }, { t: 'Nausea only', s: 2 }, { t: 'No, just the eye pain', s: 1 }] },
+      { q: 'Does bright light make the pain worse?', opts: [{ t: 'Yes, much worse with light', s: 3 }, { t: 'Slightly more uncomfortable', s: 2 }, { t: 'Light does not affect it', s: 1 }, { t: 'Actually better in light', s: 0 }] },
+      { q: 'How long have you had diabetes?', opts: [{ t: 'Less than 1 year', s: 1 }, { t: '1–5 years', s: 2 }, { t: '5–10 years', s: 3 }, { t: 'More than 10 years', s: 3 }] },
+    ],
+  },
+];
+
+export default SYMPTOMS;
