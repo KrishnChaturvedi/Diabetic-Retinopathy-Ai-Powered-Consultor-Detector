@@ -6,6 +6,10 @@ const FormData = require('form-data')
 const analyzeScan = async (req, res) => {
   try {
 
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No image uploaded' })
+    }
+
     const imagePath = req.file.path
 
     const form = new FormData()
@@ -30,6 +34,10 @@ const analyzeScan = async (req, res) => {
 
   } catch (error) {
     console.log(error)
+    if (imagePath && fs.existsSync(imagePath)) {
+      fs.unlinkSync(imagePath)
+    }
+
     res.json({ success: false, message: error.message })
   }
 }

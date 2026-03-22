@@ -8,7 +8,7 @@ const loginAdmin = async (req, res) => {
       res.json({ success: true, token })
     }
     else {
-      res.json({ success: false, message: "Invalid Credentials" })
+      res.status(401).json({ success: false, message: "Invalid Credentials" })
     }
   } catch (error) {
     console.log(error)

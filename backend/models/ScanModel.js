@@ -7,7 +7,7 @@ const ScanSchema = new mongoose.Schema({
     required: true
   },
   grade:{
-    type:'String'
+    type:String
   },
   label:{
     type:String
