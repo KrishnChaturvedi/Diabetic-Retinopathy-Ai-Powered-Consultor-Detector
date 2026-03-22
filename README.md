@@ -1,1 +1,0 @@
-# Diabetic-Retinopathy-Ai-Powered-Consultor-Detector
