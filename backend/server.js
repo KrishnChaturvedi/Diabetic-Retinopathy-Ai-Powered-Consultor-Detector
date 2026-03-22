@@ -1,37 +1,30 @@
-import express from 'express';
-import dotenv from 'dotenv';
-import connectDB from './utils/db.js';
-import cookieParser from 'cookie-parser';
-import cors from 'cors';
+const express      = require('express')
+const cors         = require('cors')
+const dotenv       = require('dotenv')
+const cookieParser = require('cookie-parser')
+const connectDB    = require('./config/db')
+const userRouter   = require('./routes/authRoutes')
 
-// load env
-dotenv.config({
-    path:".env"
-}
-);
+dotenv.config()
+connectDB()
 
-// create express app
-const app = express();
-
-// mongodb connection
-connectDB();
+const app = express()
 
 // middlewares
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
-app.use(cookieParser());
-const corsOptions = {
-    origin: 'http://localhost:5173', // frontend server
-    credentials: true,
-    optionSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(cookieParser())
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true
+}))
 
-// simple health check
-app.get('/', (req, res) => res.send('API is running'));
+// health check
+app.get('/', (req, res) => res.send('API is running'))
 
-// backend server
+// routes
+app.use('/api/user', userRouter)
 
 app.listen(process.env.PORT, () => {
-    console.log(`Server is running on port ${process.env.PORT}`);
-});
+  console.log(`Server running on port ${process.env.PORT}`)
+})
