@@ -34,10 +34,10 @@ const registerUser = async(req,res) =>{
       password: hashedPassword
     }
 
-    const newUser = new userModel(userData)
-    const user = await newUser.save()
+  const newUser = new UserModel(userData)
+  const user = await newUser.save()
 
-    res.json({success:true,message:'Registration Successfull!'})
+  res.json({ success: true, message: 'Registration Successful!' })
 
   } catch (error) {
     console.log(error);
@@ -55,7 +55,7 @@ const loginUser = async(req,res) =>{
   return res.json({ success: false, message: 'Missing Details' })
 }
 
-    const user = await userModel.findOne({email})
+  const user = await UserModel.findOne({ email })
 
     if(!user){
       return res.json({success:false,message:'User Not Found'})

@@ -2,10 +2,10 @@ const express      = require('express')
 const cors         = require('cors')
 const dotenv       = require('dotenv')
 const cookieParser = require('cookie-parser')
-const connectDB    = require('./config/db')
-const userRouter   = require('./routes/authRoutes')
-const scanRouter = require('./routes/scanRoutes')
-const adminRouter = require('./routes/adminRoute')
+const connectDB    = require('./utils/db')
+const userRouter   = require('./routes/userRoute')
+const scanRouter   = require('./routes/scanRoutes')
+const adminRouter  = require('./routes/adminRoute')
 
 dotenv.config()
 connectDB()
@@ -29,6 +29,7 @@ app.use('/api/user', userRouter)
 app.use('/api/scan', scanRouter)
 app.use('/api/admin', adminRouter)
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server running on port ${process.env.PORT}`)
+const PORT = process.env.PORT || 5000
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`)
 })

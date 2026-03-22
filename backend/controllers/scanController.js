@@ -1,4 +1,4 @@
-const Scan = require('../models/Scan')
+const Scan = require('../models/ScanModel')
 const axios = require('axios')
 const fs = require('fs')
 const FormData = require('form-data')

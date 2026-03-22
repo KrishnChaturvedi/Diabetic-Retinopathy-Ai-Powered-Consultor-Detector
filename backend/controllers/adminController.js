@@ -16,4 +16,4 @@ const loginAdmin = async (req, res) => {
   }
 }
 
-module.exports = loginAdmin
+module.exports = { loginAdmin }
