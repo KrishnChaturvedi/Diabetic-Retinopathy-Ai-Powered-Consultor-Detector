@@ -1,24 +1,25 @@
-const express    = require('express')
-const multer     = require('multer')
+const express = require('express')
+const multer = require('multer')
+const { CloudinaryStorage } = require('multer-storage-cloudinary')
+const cloudinary = require('../utils/cloudinary')
 
 const { analyzeScan, getScanHistory } = require('../controllers/scanController')
 const auth = require('../middlewares/auth')
 
 const scanRouter = express.Router()
 
-// multer setup
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/')
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + '-' + file.originalname)
+// 🔥 replace diskStorage with CloudinaryStorage
+const storage = new CloudinaryStorage({
+  cloudinary,
+  params: {
+    folder: 'uploads',
+    allowed_formats: ['jpg', 'png', 'jpeg']
   }
 })
 
 const upload = multer({ storage })
 
 scanRouter.post('/analyze', auth, upload.single('image'), analyzeScan)
-scanRouter.get('/history',  auth, getScanHistory)
+scanRouter.get('/history', auth, getScanHistory)
 
 module.exports = scanRouter

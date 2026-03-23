@@ -1,41 +1,46 @@
-const express      = require('express')
-const cors         = require('cors')
-const dotenv       = require('dotenv')
-const cookieParser = require('cookie-parser')
-const connectDB    = require('./utils/db')
-const userRouter   = require('./routes/userRoute')
-const scanRouter   = require('./routes/scanRoutes')
-const adminRouter  = require('./routes/adminRoute')
-const quizRouter   = require('./routes/quizRoute')
+// 🔥 VERY IMPORTANT: dotenv FIRST (before everything)
+require('dotenv').config();
 
-dotenv.config()
-console.log("MONGO_URI:", process.env.MONGO_URI)
-connectDB()
+const express      = require('express');
+const cors         = require('cors');
+const cookieParser = require('cookie-parser');
 
-const app = express()
+const connectDB    = require('./utils/db');
+const userRouter   = require('./routes/userRoute');
+const scanRouter   = require('./routes/scanRoutes');
+const adminRouter  = require('./routes/adminRoute');
+const quizRouter   = require('./routes/quizRoute');
 
-// middlewares
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-app.use(cookieParser())
-// Allow CORS from the frontend during development. Set origin:true so the
-// incoming Origin header is reflected back. In production, replace with a
-// specific origin or a stricter policy.
+// Debug (optional)
+console.log("MONGO_URI:", process.env.MONGO_URI);
+
+// Connect DB
+connectDB();
+
+const app = express();
+
+// Middlewares
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+
 app.use(cors({
   origin: true,
   credentials: true,
-}))
+}));
 
-// health check
-app.get('/', (req, res) => res.send('API is running'))
+// Health check
+app.get('/', (req, res) => res.send('API is running'));
 
-// routes
-app.use('/api/user', userRouter)
-app.use('/api/scan', scanRouter)
-app.use('/api/admin', adminRouter)
-app.use('/api/quiz',quizRouter)
+// Routes
+app.use('/api/user', userRouter);
+app.use('/api/scan', scanRouter);
+app.use('/api/admin', adminRouter);
+app.use('/api/quiz', quizRouter);
 
-const PORT = process.env.PORT || 8080
+// Start server
+const PORT = process.env.PORT || 8080;
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+  console.log(`Server running on port ${PORT}`);
+});
