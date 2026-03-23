@@ -18,9 +18,12 @@ const app = express()
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
+// Allow CORS from the frontend during development. Set origin:true so the
+// incoming Origin header is reflected back. In production, replace with a
+// specific origin or a stricter policy.
 app.use(cors({
-  origin: 'http://localhost:3000',
-  credentials: true
+  origin: true,
+  credentials: true,
 }))
 
 // health check

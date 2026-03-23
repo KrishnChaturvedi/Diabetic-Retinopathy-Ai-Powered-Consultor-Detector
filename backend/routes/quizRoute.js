@@ -15,6 +15,9 @@ function calculateRisk(total, max) {
 quizRouter.post('/submit', async (req, res) => {
   try {
     const { symptom, answers } = req.body;
+    console.log('[/api/quiz/submit] incoming request from', req.ip)
+    console.log('Headers:', req.headers.origin || req.headers.host)
+    console.log('Body sample:', { symptom, answers: Array.isArray(answers) ? answers.slice(0,3) : answers })
 
     if (!answers || !Array.isArray(answers)) {
       return res.status(400).json({ error: 'Answers must be an array' });

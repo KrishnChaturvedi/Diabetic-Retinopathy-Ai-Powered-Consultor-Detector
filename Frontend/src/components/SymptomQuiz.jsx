@@ -19,7 +19,7 @@ export default function SymptomQuiz({ onAskChat }) {
     if (done && sym) {
       sendResult();
     }
-  }, [done]);
+  }, [done, sym]);
 
   function pickSymptom(id) {
     setActive(id);
@@ -48,15 +48,28 @@ export default function SymptomQuiz({ onAskChat }) {
         .sort((a, b) => Number(a) - Number(b))
         .map((k) => answers[k]);
 
-      const res = await axios.post('http://localhost:8080/api/quiz/submit', {
-        symptom: sym.label,
-        answers: answersArray,
-      });
+      // Build API base using the page's hostname so mobile devices (accessing the
+      // frontend via the dev machine's LAN IP) post to the correct backend host.
+      const apiHost = window.location.hostname || 'localhost';
+      const apiProtocol = window.location.protocol || 'http:';
+      const API_BASE = `${apiProtocol}//${apiHost}:8080`;
+
+      const res = await axios.post(
+        `${API_BASE}/api/quiz/submit`,
+        {
+          symptom: sym.label,
+          answers: answersArray,
+          totalScore: total,
+          maxScore,
+        },
+        { headers: { 'Content-Type': 'application/json' }, timeout: 8000 }
+      );
 
       setBackendRisk(res.data);
     } catch (err) {
-      console.error(err);
-      setError('Failed to save quiz');
+      console.error('sendResult error ->', err?.response || err.message || err);
+      const serverMsg = err?.response?.data?.error || err?.response?.data?.message;
+      setError(serverMsg || err.message || 'Failed to save quiz');
     } finally {
       setLoading(false);
     }
@@ -111,66 +124,39 @@ export default function SymptomQuiz({ onAskChat }) {
 
       {loading && <div className="loading">Saving your result...</div>}
 
-   {sym && done && backendRisk?.success && (
-  <div className="quiz-card result-card">
-    <div className="result-hdr">
-      <span className="result-hdr-title">
-        {sym.emoji} {sym.label} — Quiz Complete
-      </span>
-      <span className="result-done">✓ {sym.questions.length}/{sym.questions.length} answered</span>
-    </div>
+      {sym && done && (
+        <div className="quiz-card result-card">
+          <div className="result-body">
+            {backendRisk?.success ? (
+              <>
+                <div><strong>Saved to server:</strong></div>
+                <div>Risk: {backendRisk.riskLevel}</div>
+                <div>Percentage: {backendRisk.percentage}%</div>
+              </>
+            ) : (
+              <>
+                <div><strong>Result not saved yet.</strong></div>
+                <div style={{ marginTop: 8 }}>
+                  <button className="rbtn rbtn-pri" onClick={() => sendResult()} disabled={loading}>
+                    {loading ? 'Saving...' : 'Save Result'}
+                  </button>
+                </div>
+              </>
+            )}
 
-    <div className="result-body">
-      {/* Backend result */}
-      <div className="backend-result" style={{ marginBottom: 12 }}>
-        <strong>Saved to server:</strong>
-        <div>Risk Level: {backendRisk.riskLevel}</div>
-        <div>Percentage: {backendRisk.percentage}%</div>
-      </div>
+            {error && <div style={{ color: 'crimson', marginTop: 8 }}>{error}</div>}
 
-      {/* Risk Banner using backend risk */}
-      <div
-        className="risk-banner"
-        style={{
-          background:
-            backendRisk.riskLevel === 'High'
-              ? '#fee2e2'
-              : backendRisk.riskLevel === 'Medium'
-              ? '#ffedd5'
-              : '#dcfce7',
-          border:
-            backendRisk.riskLevel === 'High'
-              ? '1px solid #dc2626'
-              : backendRisk.riskLevel === 'Medium'
-              ? '1px solid #ea580c'
-              : '1px solid #15803d',
-          color:
-            backendRisk.riskLevel === 'High'
-              ? '#dc2626'
-              : backendRisk.riskLevel === 'Medium'
-              ? '#ea580c'
-              : '#15803d',
-          padding: '10px',
-          borderRadius: '8px',
-          marginBottom: '12px',
-        }}
-      >
-        <strong>Risk Level:</strong> {backendRisk.riskLevel} — {backendRisk.percentage}%
-      </div>
+            <div className="score-label-row" style={{ marginTop: 12 }}>
+              <span>Risk Score</span>
+              <span>{total} / {maxScore} points</span>
+            </div>
 
-      {/* Score Summary */}
-      <div className="score-label-row">
-        <span>Risk Score</span>
-        <span>{total} / {maxScore} points</span>
-      </div>
-
-      {/* Retake button */}
-      <button className="rbtn rbtn-sec" onClick={() => pickSymptom(active)}>
-        Retake Quiz
-      </button>
-    </div>
-  </div>
-)}
+            <div style={{ marginTop: 12 }}>
+              <button className="rbtn rbtn-sec" onClick={() => pickSymptom(active)}>Retake Quiz</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
