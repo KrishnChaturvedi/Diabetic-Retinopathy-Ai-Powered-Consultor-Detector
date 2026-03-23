@@ -8,6 +8,7 @@ import HowItWorks   from './components/HowItWorks';
 import About        from './components/About';
 import Contact      from './components/Contact';
 import ChatFAB      from './components/ChatFAB';
+import { Toaster } from 'react-hot-toast'
 import { mockAnalyze } from './data/grades';
 import './App.css';
 
@@ -66,7 +67,9 @@ export default function App() {
   }
 
   return (
+    
     <div className="app">
+      <Toaster position="top-right" />
       <Navbar page={page} onHome={handleHome} onNavigate={handleNavigate} />
 
       {page === 'home' && (
