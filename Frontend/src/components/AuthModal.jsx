@@ -1,53 +1,72 @@
 import React, { useState } from 'react';
+import axios from 'axios';
+import toast from 'react-hot-toast';
 import './AuthModal.css';
 
+const API = 'http://localhost:8080';
+
 export default function AuthModal({ onCancel, onSuccess }) {
-  const [mode, setMode] = useState('register'); // 'register' | 'login'
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [mode, setMode]         = useState('login');
+  const [name, setName]         = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
-  const [phone, setPhone] = useState('');
-  const [error, setError] = useState('');
+  const [loading, setLoading]   = useState(false);
 
-  const reset = () => {
-    setName('');
-    setEmail('');
-    setPassword('');
-    setPhone('');
-    setError('');
+  const reset = () => { setName(''); setEmail(''); setPassword(''); };
+
+  const submitRegister = async (e) => {
+    e.preventDefault();
+    if (!name.trim())        return toast.error('Please enter your name');
+    if (!email.trim())       return toast.error('Please enter an email');
+    if (password.length < 8) return toast.error('Password must be at least 8 characters');
+
+    setLoading(true);
+    try {
+      const { data } = await axios.post(`${API}/api/user/register`, { name, email, password });
+      if (!data.success) return toast.error(data.message);
+
+      // auto login after register
+      const { data: loginData } = await axios.post(`${API}/api/user/login`, { email, password });
+      if (!loginData.success) return toast.error('Registered! Please login.');
+
+      localStorage.setItem('token', loginData.token);
+      toast.success('Account created successfully!');
+      onSuccess({ name: name.trim(), email: email.trim() });
+      reset();
+
+    } catch (err) {
+      toast.error('Server error. Make sure backend is running.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const submitRegister = (e) => {
+  const submitLogin = async (e) => {
     e.preventDefault();
-    if (!name.trim()) return setError('Please enter your name');
-    if (!email.trim()) return setError('Please enter an email');
-    if (!password) return setError('Please enter a password');
-    // Minimal phone validation
-    if (phone && phone.length < 6) return setError('Please enter a valid phone');
-    setError('');
-    const u = { name: name.trim(), email: email.trim(), phone: phone.trim() };
-    onSuccess(u);
-    reset();
-  };
+    if (!email.trim()) return toast.error('Please enter your email');
+    if (!password)     return toast.error('Please enter your password');
 
-  const submitLogin = (e) => {
-    e.preventDefault();
-    if (!email.trim()) return setError('Please enter your email');
-    if (!password) return setError('Please enter your password');
-    setError('');
-    // For demo, we just accept the credentials and set name as the email prefix
-    const username = email.split('@')[0] || email;
-    const u = { name: username, email: email.trim() };
-    onSuccess(u);
-    reset();
+    setLoading(true);
+    try {
+      const { data } = await axios.post(`${API}/api/user/login`, { email, password });
+      if (!data.success) return toast.error(data.message || 'Invalid credentials');
+
+      localStorage.setItem('token', data.token);
+      toast.success(`Welcome back!`);
+      onSuccess({ name: email.split('@')[0], email: email.trim() });
+      reset();
+
+    } catch (err) {
+      toast.error('Server error. Make sure backend is running.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="auth-overlay" role="dialog" aria-modal="true">
       <div className="auth-card">
-        <button className="auth-close" aria-label="Close" onClick={onCancel}>
-          ✕
-        </button>
+        <button className="auth-close" onClick={onCancel}>✕</button>
 
         <div className="auth-header">
           <h3>Welcome</h3>
@@ -55,64 +74,43 @@ export default function AuthModal({ onCancel, onSuccess }) {
         </div>
 
         <div className="auth-tabs">
-          <button
-            className={mode === 'register' ? 'active' : ''}
-            onClick={() => setMode('register')}
-          >
-            Register
-          </button>
-          <button
-            className={mode === 'login' ? 'active' : ''}
-            onClick={() => setMode('login')}
-          >
-            Login
-          </button>
+          <button className={mode === 'register' ? 'active' : ''} onClick={() => { setMode('register'); reset(); }}>Register</button>
+          <button className={mode === 'login'    ? 'active' : ''} onClick={() => { setMode('login');    reset(); }}>Login</button>
         </div>
 
         {mode === 'register' ? (
           <form className="auth-form" onSubmit={submitRegister}>
-            <label>
-              Name
+            <label>Name
               <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Full name" />
             </label>
-            <label>
-              Email
+            <label>Email
               <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@domain.com" />
             </label>
-            <label>
-              Password
+            <label>Password
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
             </label>
-            <label>
-              Phone (optional)
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+1 555 555 5555" />
-            </label>
-
-            {error && <div className="auth-error">{error}</div>}
-
             <div className="auth-actions">
-              <button type="submit" className="btn-primary">Create account</button>
-              <button type="button" className="btn-ghost" onClick={() => { setMode('login'); setError(''); }}>
+              <button type="submit" className="btn-primary" disabled={loading}>
+                {loading ? 'Creating account...' : 'Create account'}
+              </button>
+              <button type="button" className="btn-ghost" onClick={() => { setMode('login'); reset(); }}>
                 Have an account? Login
               </button>
             </div>
           </form>
         ) : (
           <form className="auth-form" onSubmit={submitLogin}>
-            <label>
-              Email
+            <label>Email
               <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@domain.com" />
             </label>
-            <label>
-              Password
+            <label>Password
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" />
             </label>
-
-            {error && <div className="auth-error">{error}</div>}
-
             <div className="auth-actions">
-              <button type="submit" className="btn-primary">Sign in</button>
-              <button type="button" className="btn-ghost" onClick={() => { setMode('register'); setError(''); }}>
+              <button type="submit" className="btn-primary" disabled={loading}>
+                {loading ? 'Signing in...' : 'Sign in'}
+              </button>
+              <button type="button" className="btn-ghost" onClick={() => { setMode('register'); reset(); }}>
                 New here? Register
               </button>
             </div>

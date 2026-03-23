@@ -1,45 +1,41 @@
 import React, { useState } from 'react';
-import Navbar       from './components/Navbar';
-import Hero         from './components/Hero';
-import UploadPage   from './components/UploadPage';
-import Analyzing    from './components/Analyzing';
-import ResultsPage  from './components/ResultsPage';
-import HowItWorks   from './components/HowItWorks';
-import About        from './components/About';
-import Contact      from './components/Contact';
-import ChatFAB      from './components/ChatFAB';
-import { Toaster } from 'react-hot-toast'
-import { mockAnalyze } from './data/grades';
+import Navbar      from './components/Navbar';
+import Hero        from './components/Hero';
+import UploadPage  from './components/UploadPage';
+import Analyzing   from './components/Analyzing';
+import ResultsPage from './components/ResultsPage';
+import HowItWorks  from './components/HowItWorks';
+import About       from './components/About';
+import Contact     from './components/Contact';
+import ChatFAB     from './components/ChatFAB';
+import AuthModal   from './components/AuthModal';
+import { Toaster } from 'react-hot-toast';
 import './App.css';
 
-const ANALYSIS_STEPS = ['Uploading', 'Preprocessing', 'AI model', 'Lesion mapping', 'Report'];
+const STEPS = ['Uploading', 'Preprocessing', 'AI model', 'Lesion mapping', 'Report'];
 
 export default function App() {
-  const [page, setPage]       = useState('home');       // 'home' | 'analyzing' | 'results'
+  const [page, setPage]     = useState('home');
   const [preview, setPreview] = useState(null);
   const [patient, setPatient] = useState({});
   const [result, setResult]   = useState(null);
   const [aStep, setAStep]     = useState(0);
-  const [pending, setPending] = useState(null);         // pending chat message
+  const [pending, setPending] = useState(null);
+  const [user, setUser]       = useState(null);
+  const [showAuth, setShowAuth] = useState(false);
 
-  // Called when user clicks "Analyze"
-  async function handleAnalyze(file, prev, pat) {
+  async function handleAnalyze(file, prev, pat, mappedResult) {
     setPreview(prev);
     setPatient(pat);
     setPage('analyzing');
     setAStep(0);
 
-    // Simulate AI analysis steps
-    for (let i = 0; i < ANALYSIS_STEPS.length; i++) {
-      await new Promise((r) => setTimeout(r, 620));
+    for (let i = 0; i < STEPS.length; i++) {
+      await new Promise(r => setTimeout(r, 620));
       setAStep(i + 1);
     }
-    await new Promise((r) => setTimeout(r, 350));
-
-    // In production: replace mockAnalyze() with real API call
-    // const res = await fetch('/api/analyze', { method: 'POST', body: formData });
-    // const data = await res.json();
-    setResult(mockAnalyze());
+    await new Promise(r => setTimeout(r, 350));
+    setResult(mappedResult);
     setPage('results');
   }
 
@@ -51,51 +47,51 @@ export default function App() {
     setAStep(0);
   }
 
-  // Navigate to About / Contact pages. These pages display their content
-  // and keep the footer visible while hiding the main app containers.
-  function handleNavigate(to) {
-    if (to === 'about' || to === 'contact') {
-      setPage(to);
-      return;
-    }
-    // fallback: treat as home
-    setPage('home');
-  }
-
-  function openChat(msg) {
-    setPending(msg);
+  function handleLogout() {
+    localStorage.removeItem('token');
+    setUser(null);
   }
 
   return (
-    
     <div className="app">
       <Toaster position="top-right" />
-      <Navbar page={page} onHome={handleHome} onNavigate={handleNavigate} />
+
+      <Navbar
+        page={page}
+        onHome={handleHome}
+        onNavigate={to => setPage(to)}
+        user={user}
+        onSignIn={() => setShowAuth(true)}
+        onLogout={handleLogout}
+      />
+
+      {showAuth && (
+        <AuthModal
+          onCancel={() => setShowAuth(false)}
+          onSuccess={u => { setUser(u); setShowAuth(false); }}
+        />
+      )}
 
       {page === 'home' && (
         <>
           <Hero />
-
           <div className="wrap">
-            <UploadPage onAnalyze={handleAnalyze} onAskChat={openChat} />
-
-            {page === 'analyzing' && (
-              <Analyzing activeStep={aStep} />
-            )}
-
-            {page === 'results' && result && (
-              <ResultsPage
-                result={result}
-                preview={preview}
-                patient={patient}
-                onHome={handleHome}
-                onAskChat={openChat}
-              />
-            )}
+            <UploadPage onAnalyze={handleAnalyze} onAskChat={msg => setPending(msg)} />
           </div>
-
           <HowItWorks />
         </>
+      )}
+
+      {page === 'analyzing' && <Analyzing activeStep={aStep} />}
+
+      {page === 'results' && result && (
+        <ResultsPage
+          result={result}
+          preview={preview}
+          patient={patient}
+          onHome={handleHome}
+          onAskChat={msg => setPending(msg)}
+        />
       )}
 
       {page === 'about' && <About />}
@@ -105,11 +101,7 @@ export default function App() {
         Retinopathy Detector · AI-Powered Early Screening · HackXTract 2026 · MAIT
       </footer>
 
-      {/* Floating AI Chat Button — fixed bottom right */}
-      <ChatFAB
-        pending={pending}
-        onUsed={() => setPending(null)}
-      />
+      <ChatFAB pending={pending} onUsed={() => setPending(null)} />
     </div>
   );
 }
