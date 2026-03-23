@@ -54,6 +54,8 @@ export default function SymptomQuiz({ onAskChat }) {
       const apiProtocol = window.location.protocol || 'http:';
       const API_BASE = `${apiProtocol}//${apiHost}:8080`;
 
+      const token = localStorage.getItem('token');
+
       const res = await axios.post(
         `${API_BASE}/api/quiz/submit`,
         {
@@ -62,7 +64,7 @@ export default function SymptomQuiz({ onAskChat }) {
           totalScore: total,
           maxScore,
         },
-        { headers: { 'Content-Type': 'application/json' }, timeout: 8000 }
+        { headers: { 'Content-Type': 'application/json','Authorization': `Bearer ${token}` }, timeout: 8000 }
       );
 
       setBackendRisk(res.data);
