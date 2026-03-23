@@ -1,54 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import './Navbar.css';
-import AuthModal from './AuthModal';
 
 // Navbar shows Home / About / Contact links and a Sign In / Sign Out button.
 // Props:
 // - page: current page key ('home' | 'about' | 'contact' | ...)
 // - onHome: callback when Home is requested
 // - onNavigate: optional callback when About/Contact requested (receives page key)
-export default function Navbar({ page, onHome, onNavigate }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [user, setUser] = useState(null);
-  const [showAuth, setShowAuth] = useState(false);
+export default function Navbar({ page, onHome, onNavigate, user, onSignIn, onLogout }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem('retinopathy_user');
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        setUser(parsed);
-        setIsLoggedIn(true);
-      }
-    } catch (e) {
-      // ignore parse errors
-    }
-  }, []);
-
-  const handleLogin = () => {
-    // Open the modal for register / login
-    setShowAuth(true);
-  };
-
-  const handleAuthSuccess = (u) => {
-    // u = { name?, email?, phone? }
-    localStorage.setItem('retinopathy_user', JSON.stringify(u));
-    setUser(u);
-    setIsLoggedIn(true);
-    setShowAuth(false);
-  };
-
-  const handleAuthCancel = () => {
-    setShowAuth(false);
-  };
-
-  const handleSignOut = () => {
-    localStorage.removeItem('retinopathy_user');
-    setUser(null);
-    setIsLoggedIn(false);
-    setMobileOpen(false);
-  };
 
   const navigate = (to) => {
     if (to === 'home') {
@@ -109,22 +68,13 @@ export default function Navbar({ page, onHome, onNavigate }) {
       <div className="nav-right">
         <span className="nav-badge">AI-Powered · HackXTract 2026</span>
 
-        {isLoggedIn ? (
+        {user ? (
           <div className="nav-user">
             <span className="nav-username">Hi, {user?.name ?? 'User'}</span>
-            <button className="btn-ghost" onClick={handleSignOut}>
-              Sign Out
-            </button>
+            <button className="btn-ghost" onClick={onLogout}>Sign Out</button>
           </div>
         ) : (
-          <>
-            <button className="btn-primary" onClick={handleLogin}>
-              Sign In
-            </button>
-            {showAuth && (
-              <AuthModal onCancel={handleAuthCancel} onSuccess={handleAuthSuccess} />
-            )}
-          </>
+          <button className="btn-primary" onClick={onSignIn}>Sign In</button>
         )}
       </div>
 
@@ -133,15 +83,13 @@ export default function Navbar({ page, onHome, onNavigate }) {
         <button className="mobile-link" onClick={() => navigate('home')}>Home</button>
         <button className="mobile-link" onClick={() => navigate('about')}>About</button>
         <button className="mobile-link" onClick={() => navigate('contact')}>Contact Us</button>
-        {isLoggedIn ? (
-          <div className="mobile-user">
-            <div className="mobile-username">Hi, {user?.name ?? 'User'}</div>
-            <button className="mobile-logout" onClick={handleSignOut}>Sign Out</button>
+        {user ? (
+          <div className="nav-user">
+            <span className="nav-username">Hi, {user?.name ?? 'User'}</span>
+            <button className="btn-ghost" onClick={onLogout}>Sign Out</button>
           </div>
         ) : (
-          <div className="mobile-auth">
-            <button className="btn-primary" onClick={() => { setShowAuth(true); setMobileOpen(false); }}>Sign In</button>
-          </div>
+          <button className="btn-primary" onClick={onSignIn}>Sign In</button>
         )}
       </div>
     </nav>
