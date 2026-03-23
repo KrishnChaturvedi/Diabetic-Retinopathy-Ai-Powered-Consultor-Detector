@@ -2,6 +2,7 @@
 const express = require('express');
 const quizRouter = express.Router();
 const QuizResult = require('../models/quizSchema');
+const auth = require('../middlewares/auth');
 
 // Risk calculation based on percentage
 function calculateRisk(total, max) {
@@ -12,7 +13,7 @@ function calculateRisk(total, max) {
 }
 
 // POST /api/quiz/submit
-quizRouter.post('/submit', async (req, res) => {
+quizRouter.post('/submit',auth, async (req, res) => {
   try {
     const { symptom, answers } = req.body;
 
@@ -32,6 +33,7 @@ quizRouter.post('/submit', async (req, res) => {
       maxScore,
       risklevel: riskLevel,
       percentage,
+      user: req.user.id,
     });
 
     const saved = await result.save();
