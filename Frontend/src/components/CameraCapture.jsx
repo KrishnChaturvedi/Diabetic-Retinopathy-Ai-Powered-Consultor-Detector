@@ -4,95 +4,119 @@ import './CameraCapture.css';
 export default function CameraCapture({ onCancel, onCapture }) {
   const videoRef = useRef(null);
   const streamRef = useRef(null);
+
   const [error, setError] = useState('');
   const [facingMode, setFacingMode] = useState('environment');
 
-  // close on Esc
-  useEffect(() => {
-    function onKey(e) {
-      if (e.key === 'Escape') {
-        stopCamera();
-        if (onCancel) onCancel();
-      }
-    }
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  // Auto start camera on mount
   useEffect(() => {
     startCamera();
     return () => stopCamera();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [facingMode]);
 
   async function startCamera() {
-    setError('');
     try {
-      const constraints = { video: { facingMode }, audio: false };
-      const s = await navigator.mediaDevices.getUserMedia(constraints);
-      streamRef.current = s;
+      setError('');
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode,
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
+
+      streamRef.current = stream;
+
       if (videoRef.current) {
-        videoRef.current.srcObject = s;
+        videoRef.current.srcObject = stream;
         await videoRef.current.play();
       }
-    } catch (e) {
-      console.error('camera start error', e);
-      setError('Unable to access camera. Check permissions and try again.');
+    } catch (err) {
+      console.error(err);
+      setError('Camera blocked. Tap anywhere to allow access.');
     }
   }
 
   function stopCamera() {
-    try {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((t) => t.stop());
-        streamRef.current = null;
-      }
-    } catch (e) {
-      // ignore
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
     }
   }
 
-  async function handleCapture() {
-    if (!videoRef.current) return;
+  function handleCapture() {
     const video = videoRef.current;
+    if (!video) return;
+
     const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
     const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    ctx.drawImage(video, 0, 0);
+
     canvas.toBlob((blob) => {
       if (blob) {
-        const file = new File([blob], `capture-${Date.now()}.jpg`, { type: blob.type });
-        onCapture(file, URL.createObjectURL(blob));
+        const file = new File([blob], 'capture.jpg', { type: 'image/jpeg' });
+        onCapture?.(file, URL.createObjectURL(blob));
       }
-    }, 'image/jpeg', 0.92);
+    }, 'image/jpeg');
+
     stopCamera();
   }
 
-  function handleOverlayClick(e) {
-    // close only when clicking the overlay (not the card)
-    if (e.target === e.currentTarget) {
-      stopCamera();
-      if (onCancel) onCancel();
-    }
+  function handleFlip() {
+    const newMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(newMode);
   }
 
   return (
-    <div className="camera-overlay" onMouseDown={handleOverlayClick} onClick={handleOverlayClick}>
-      <div className="camera-card" onMouseDown={(e) => e.stopPropagation()}>
-        <button type="button" className="camera-close" onClick={() => { stopCamera(); if (onCancel) onCancel(); }} aria-label="Close">✕</button>
+    <div
+      className="camera-overlay"
+      onClick={() => {
+        // Retry camera if blocked (mobile fix)
+        if (error) startCamera();
+      }}
+    >
+      <div className="camera-card" onClick={(e) => e.stopPropagation()}>
+        
+        {/* Close */}
+        <button className="camera-close" onClick={() => {
+          stopCamera();
+          onCancel?.();
+        }}>
+          ✕
+        </button>
+
+        {/* Camera View */}
         <div className="camera-view">
           {error ? (
             <div className="camera-error">{error}</div>
           ) : (
-            <video ref={videoRef} playsInline muted />
+            <video
+              ref={videoRef}
+              playsInline
+              muted
+              autoPlay
+              className="camera-video"
+            />
           )}
         </div>
-        <div className="camera-actions">
-          <button type="button" className="btn-ghost" onClick={() => setFacingMode((f) => f === 'user' ? 'environment' : 'user')}>Flip</button>
-          <button type="button" className="btn-primary" onClick={handleCapture}>Capture</button>
-        </div>
+
+        {/* Controls */}
+       <div className="camera-controls">
+  <div className="camera-controls">
+  <button className="flip-btn" onClick={handleFlip}>
+    🔄
+  </button>
+
+  <button className="capture-btn" onClick={handleCapture}>
+    <span className="capture-inner"></span>
+  </button>
+</div>
+</div>
       </div>
     </div>
   );
