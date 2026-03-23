@@ -21,7 +21,17 @@ export default function App() {
   const [result, setResult]   = useState(null);
   const [aStep, setAStep]     = useState(0);
   const [pending, setPending] = useState(null);
-  const [user, setUser]       = useState(null);
+  const [user, setUser] = useState(() => {
+  const token = localStorage.getItem('token');
+  if (!token) return null;
+  // decode name from token or use a fallback
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return { name: payload.name || payload.email || 'User', email: payload.email };
+  } catch {
+    return { name: 'User', email: '' };
+  }
+});
   const [showAuth, setShowAuth] = useState(false);
 
   async function handleAnalyze(file, prev, pat, mappedResult) {
@@ -76,7 +86,7 @@ export default function App() {
         <>
           <Hero />
           <div className="wrap">
-            <UploadPage onAnalyze={handleAnalyze} onAskChat={msg => setPending(msg)} />
+            <UploadPage onAnalyze={handleAnalyze} onAskChat={msg => setPending(msg)} user={user} />
           </div>
           <HowItWorks />
         </>

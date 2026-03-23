@@ -3,7 +3,7 @@ import SymptomQuiz from './SymptomQuiz';
 import CameraCapture from './CameraCapture';
 import './UploadPage.css';
 
-export default function UploadPage({ onAnalyze, onAskChat }) {
+export default function UploadPage({ onAnalyze, onAskChat, user }) {
   const fileRef = useRef();
   const [file, setFile]     = React.useState(null);
   const [preview, setPreview] = React.useState(null);
@@ -123,7 +123,7 @@ export default function UploadPage({ onAnalyze, onAskChat }) {
       </div>
 
       {/* Symptom Quiz */}
-      <SymptomQuiz onAskChat={onAskChat} />
+      {user && <SymptomQuiz onAskChat={onAskChat} />}
       {showCamera && (
         <CameraCapture
           onCancel={() => setShowCamera(false)}
